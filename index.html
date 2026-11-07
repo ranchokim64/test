@@ -81,6 +81,14 @@
     font-size: 0.8rem;
     color: #6b7280;
   }
+  .status {
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  .status.ok { color: #34d399; }
+  .status.error { color: #f87171; }
+  #count.disabled { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -93,14 +101,15 @@
       정상적으로 동작하는지 확인해 보세요.
     </p>
     <div class="clock" id="clock">--:--:--</div>
+    <div class="status" id="status">Firestore 연결 중...</div>
     <div class="counter-row">
       <button id="decrement">-</button>
       <span id="count">0</span>
       <button id="increment">+</button>
     </div>
     <div class="footer">
-      수정 후 다시 배포하면 이 문구나 배지 텍스트를 바꿔서<br />
-      변경 사항이 반영되는지도 테스트해 보세요.
+      이 카운터 값은 Firestore(<code>counter/main</code> 문서)에 저장됩니다.<br />
+      새로고침하거나 다른 브라우저로 열어도 같은 값을 보게 되는지 확인해 보세요.
     </div>
   </div>
 
@@ -113,16 +122,71 @@
     }
     updateClock();
     setInterval(updateClock, 1000);
+  </script>
 
-    let count = 0;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      onSnapshot,
+      setDoc,
+      updateDoc,
+      increment,
+    } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+    // TODO: Firebase 콘솔 > 프로젝트 설정 > 일반 > 내 앱(웹 앱)에서
+    // 발급받은 설정값으로 아래를 채워주세요.
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID",
+    };
+
+    const statusEl = document.getElementById("status");
     const countEl = document.getElementById("count");
-    document.getElementById("increment").addEventListener("click", () => {
-      count++;
-      countEl.textContent = count;
+    const incrementBtn = document.getElementById("increment");
+    const decrementBtn = document.getElementById("decrement");
+
+    incrementBtn.disabled = true;
+    decrementBtn.disabled = true;
+    countEl.classList.add("disabled");
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const counterRef = doc(db, "counter", "main");
+
+    onSnapshot(
+      counterRef,
+      (snap) => {
+        if (snap.exists()) {
+          countEl.textContent = snap.data().value ?? 0;
+        } else {
+          // 문서가 아직 없으면 0으로 생성
+          setDoc(counterRef, { value: 0 });
+          countEl.textContent = 0;
+        }
+        statusEl.textContent = "Firestore 연결됨 ✅";
+        statusEl.className = "status ok";
+        incrementBtn.disabled = false;
+        decrementBtn.disabled = false;
+        countEl.classList.remove("disabled");
+      },
+      (error) => {
+        console.error(error);
+        statusEl.textContent = "Firestore 연결 실패 - firebaseConfig 또는 보안 규칙을 확인하세요.";
+        statusEl.className = "status error";
+      }
+    );
+
+    incrementBtn.addEventListener("click", () => {
+      updateDoc(counterRef, { value: increment(1) }).catch((err) => console.error(err));
     });
-    document.getElementById("decrement").addEventListener("click", () => {
-      count--;
-      countEl.textContent = count;
+    decrementBtn.addEventListener("click", () => {
+      updateDoc(counterRef, { value: increment(-1) }).catch((err) => console.error(err));
     });
   </script>
 </body>

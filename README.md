@@ -43,10 +43,35 @@ Firebase 설정과 프로젝트 연결 과정을 직접 연습하는 부분입�
    ```
 6. 완료 후 터미널에 출력되는 Hosting URL(`https://<project-id>.web.app`)로 접속해 확인합니다.
 
-## 3. 배포 확인 체크리스트
+## 3. Firestore 연동 카운터 설정하기
+
+`index.html`의 +/- 카운터는 Firestore의 `counter/main` 문서(`value` 필드, number 타입)와 연동되어 있습니다.
+새로고침해도, 다른 브라우저에서 열어도 같은 값을 보게 됩니다. 아직은 `firebaseConfig`가 비어 있어서(`YOUR_API_KEY` 등) 바로 동작하지 않습니다.
+
+1. Firebase 콘솔 → 해당 프로젝트 → **프로젝트 설정(⚙️) → 일반** 탭으로 이동합니다.
+2. 하단 "내 앱"에 웹 앱이 없다면 `</>` 아이콘을 눌러 웹 앱을 하나 등록합니다(앱 닉네임만 입력하면 됨, Hosting 설정은 건너뛰어도 됩니다).
+3. 표시되는 `firebaseConfig` 객체(`apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`) 값을 복사합니다.
+4. `index.html` 안의 `const firebaseConfig = { ... }` 부분을 복사한 값으로 교체합니다.
+5. Firestore에 `counter` 컬렉션이 없다면 코드가 자동으로 `counter/main` 문서를 `value: 0`으로 만듭니다. 미리 만들어둬도 됩니다.
+6. Firestore 콘솔의 **규칙(Rules)** 탭에서 테스트 모드 규칙(또는 아래처럼 `counter` 컬렉션만 열어주는 규칙)이 적용되어 있는지 확인합니다:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /counter/{docId} {
+         allow read, write: if true;
+       }
+     }
+   }
+   ```
+   (연습용 공개 규칙입니다. 실제 서비스에서는 이렇게 쓰면 안 됩니다.)
+7. `firebaseConfig`를 수정한 뒤 다시 배포(GitHub Pages는 push, Firebase Hosting은 `firebase deploy`)하고 버튼을 눌러 값이 Firestore 콘솔에서도 바뀌는지 확인합니다.
+
+## 4. 배포 확인 체크리스트
 - [ ] 페이지 제목과 "배포 테스트 v1" 배지가 보이는가
 - [ ] 시계가 1초마다 갱신되는가
-- [ ] `+` / `-` 버튼을 누르면 숫자가 바뀌는가
-- [ ] `index.html`의 텍스트(예: 배지 문구)를 수정 후 재배포하면 변경 사항이 반영되는가
+- [ ] 상태 문구가 "Firestore 연결됨 ✅"으로 바뀌는가
+- [ ] `+` / `-` 버튼을 누르면 숫자가 바뀌고, Firestore 콘솔의 `counter/main` 문서 값도 같이 바뀌는가
+- [ ] 새로고침하거나 다른 브라우저로 열어도 같은 숫자가 보이는가
 
 GitHub Pages와 Firebase Hosting 양쪽에 모두 배포해 두고 두 URL을 비교해 보면 배포 흐름의 차이를 이해하기 좋습니다.
