@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>배포 연습 페이지</title>
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    color: #f3f4f6;
+  }
+  .card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    max-width: 480px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  }
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 1.6rem;
+  }
+  .badge {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    background: #2563eb;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  p.desc {
+    color: #9ca3af;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .clock {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+  }
+  .counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  button {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  button:hover { background: #1d4ed8; }
+  #count {
+    font-size: 1.4rem;
+    font-weight: 700;
+    min-width: 2.5rem;
+  }
+  .footer {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">배포 테스트 v1</span>
+    <h1>🚀 배포 연습 페이지</h1>
+    <p class="desc">
+      이 페이지는 GitHub Pages 또는 Firebase Hosting으로 배포하는 연습을 위한
+      간단한 정적 웹페이지입니다. 배포가 끝나면 아래 시계와 버튼이
+      정상적으로 동작하는지 확인해 보세요.
+    </p>
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="counter-row">
+      <button id="decrement">-</button>
+      <span id="count">0</span>
+      <button id="increment">+</button>
+    </div>
+    <div class="footer">
+      수정 후 다시 배포하면 이 문구나 배지 텍스트를 바꿔서<br />
+      변경 사항이 반영되는지도 테스트해 보세요.
+    </div>
+  </div>
+
+  <script>
+    const clockEl = document.getElementById("clock");
+    function updateClock() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      clockEl.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    let count = 0;
+    const countEl = document.getElementById("count");
+    document.getElementById("increment").addEventListener("click", () => {
+      count++;
+      countEl.textContent = count;
+    });
+    document.getElementById("decrement").addEventListener("click", () => {
+      count--;
+      countEl.textContent = count;
+    });
+  </script>
+</body>
+</html>
